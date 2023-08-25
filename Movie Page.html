@@ -133,30 +133,36 @@
                 });
                 card.appendChild(videoElem);
 
+                const videoNameOnly = video.split("\\").pop(); // Extract the video name from the full path
                 const cardName = document.createElement("div");
                 cardName.className = "card-name";
-                cardName.textContent = video;
+                cardName.textContent = videoNameOnly; // Display the video name only
                 card.appendChild(cardName);
+
+
+                let timeoutId = null;
 
                 card.addEventListener("mouseover", () => {
                     if (cardName.style.color === "red") return;
-                    videoElem.play();
-                    card.addEventListener("mousemove", (e) => {
-                        const x = e.clientX - card.offsetLeft;
-                        // const y = e.clientY - card.offsetTop;
-                        const width = card.offsetWidth;
-                        // const height = card.offsetHeight;
 
-                        const xPercent = x / width;
-                        // const yPercent = y / height;
-                        videoElem.currentTime = videoElem.duration * xPercent;
-                        // videoElem.volume = yPercent;
-                    });
+                    timeoutId = setTimeout(() => {
+                        videoElem.play();
+                        card.addEventListener("mousemove", (e) => {
+                            const x = e.clientX - card.offsetLeft;
+                            const width = card.offsetWidth;
+
+                            const xPercent = x / width;
+                            videoElem.currentTime = videoElem.duration * xPercent;
+                        });
+                    }, 2000); // 2 seconds delay
                 });
 
                 card.addEventListener("mouseout", () => {
+                    clearTimeout(timeoutId);
                     videoElem.pause();
+                    card.removeEventListener("mousemove");
                 });
+
 
                 card.addEventListener("click", () => {
                     if (cardName.style.color === "red") return;
@@ -173,7 +179,7 @@
                     const closeButton = document.createElement("button");
                     const videoName = document.createElement("div");
                     videoName.id = "video-name";
-                    videoName.textContent = video;
+                    videoName.textContent = videoNameOnly;
                     closeButton.className = "close-button";
                     closeButton.textContent = "X";
 
@@ -194,8 +200,6 @@
                     fullscreenVideo.muted = true;
                     fullscreenVideo.loop = true;
                     fullscreenVideo.className = "fullscreen-video";
-
-
 
                     // gridContainer.style.display = "none"; // Hide the grid while playing the video   
                     videoContainer.firstChild.before(fullscreenVideo); // Insert the video before the grid 
