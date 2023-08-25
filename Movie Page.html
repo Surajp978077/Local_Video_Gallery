@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 10px;
+            padding: 10px;
+            position: relative;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 40vw;
+            height: fit-content;
+            /* border: 1px solid #ccc; */
+            overflow: hidden;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            height: 85%;
+            object-fit: cover;
+        }
+
+        .card-name {
+            padding: 10px;
+            text-align: center;
+            /* background-color: rgba(0, 0, 0, 0.5); */
+            color: white;
+        }
+
+        video.preview {
+            pointer-events: none;
+            height: 300px;
+        }
+
+        .fullscreen-video {
+            position: relative;
+            width: 75%;
+            height: 75%;
+            background-color: black;
+
+            margin-bottom: 5vh;
+
+        }
+
+        .close-button {
+            background-color: rgba(0, 0, 0, 0.5);
+            align-self: flex-start;
+            /* position: relative;
+            right: 204px; */
+            margin: 0 10px;
+            z-index: 1;
+            color: white;
+            font-weight: bolder;
+            font-size: larger;
+        }
+
+        .video-container {
+            width: fit-content;
+            height: fit-content;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px;
+        }
+
+        #video-name {
+            color: whitesmoke;
+            text-align: center;
+            font-size: x-large;
+            width: 100%;
+            margin: 20px 0;
+        }
+    </style>
+    <title>Video Preview</title>
+</head>
+
+<body>
+    <div class="video-container">
+    </div>
+    <div class="grid">
+        <!-- JavaScript to list and handle videos -->
+        <script src="video_list.js"></script>
+        <script>
+            // const videos = ["27b556dc0fff44b8a461ec5891d48834.webm", "React Tutorial for Beginners.mp4"]; // Replace with your video filenames
+
+            const container = document.body;
+            const gridContainer = document.querySelector(".grid");
+            const videoContainer = document.querySelector(".video-container");
+            let currentFullScreenVideo = null;
+
+            if (videos.length === 0) {
+                container.innerHTML = "No videos found in this directory :( <br> Open Lauch.cmd <br> OR <br> move these files to the directory where Videos are present";
+                container.style.color = "red";
+                container.style.textAlign = "center";
+                container.style.fontSize = "xx-large";
+                container.style.marginTop = "20vh";
+                container.style.fontWeight = "bolder";
+                container.style.fontFamily = "sans-serif";
+                container.style.transition = "all 0.5s ease-in-out";
+            }
+
+
+            videos.forEach(video => {
+                const card = document.createElement("div");
+                card.className = "card";
+
+                const videoElem = document.createElement("video");
+                videoElem.className = "preview";
+                videoElem.src = video;
+                videoElem.muted = true;
+                videoElem.loop = true;
+                videoElem.addEventListener("error", () => {
+                    // videoElem.src = "Error loading video";
+                    cardName.textContent = "Error :" + video;
+                    cardName.style.color = "red";
+
+                });
+                card.appendChild(videoElem);
+
+                const cardName = document.createElement("div");
+                cardName.className = "card-name";
+                cardName.textContent = video;
+                card.appendChild(cardName);
+
+                card.addEventListener("mouseover", () => {
+                    if (cardName.style.color === "red") return;
+                    videoElem.play();
+                    card.addEventListener("mousemove", (e) => {
+                        const x = e.clientX - card.offsetLeft;
+                        // const y = e.clientY - card.offsetTop;
+                        const width = card.offsetWidth;
+                        // const height = card.offsetHeight;
+
+                        const xPercent = x / width;
+                        // const yPercent = y / height;
+                        videoElem.currentTime = videoElem.duration * xPercent;
+                        // videoElem.volume = yPercent;
+                    });
+                });
+
+                card.addEventListener("mouseout", () => {
+                    videoElem.pause();
+                });
+
+                card.addEventListener("click", () => {
+                    if (cardName.style.color === "red") return;
+                    if (currentFullScreenVideo) {
+                        currentFullScreenVideo.pause();
+                        sessionStorage.setItem(currentFullScreenVideo.src, currentFullScreenVideo.currentTime);
+                        currentFullScreenVideo.remove();
+                        document.querySelector("#video-name").remove();
+                        document.querySelector(".close-button").remove();
+                    }
+
+
+                    const fullscreenVideo = document.createElement("video");
+                    const closeButton = document.createElement("button");
+                    const videoName = document.createElement("div");
+                    videoName.id = "video-name";
+                    videoName.textContent = video;
+                    closeButton.className = "close-button";
+                    closeButton.textContent = "X";
+
+                    closeButton.addEventListener("click", () => {
+                        fullscreenVideo.pause();
+                        sessionStorage.setItem(currentFullScreenVideo.src, fullscreenVideo.currentTime);
+                        fullscreenVideo.remove();
+                        // gridContainer.style.display = "grid"; // Show the grid again
+                        currentFullScreenVideo = null; // Move this line after pausing and removing the video
+                        videoName.remove();
+                        closeButton.remove();
+                    });
+                    fullscreenVideo.controls = true;
+                    fullscreenVideo.src = video;
+                    fullscreenVideo.autoplay = true;
+                    fullscreenVideo.currentTime = sessionStorage.getItem(fullscreenVideo.src) || 0;
+
+                    fullscreenVideo.muted = true;
+                    fullscreenVideo.loop = true;
+                    fullscreenVideo.className = "fullscreen-video";
+
+
+
+                    // gridContainer.style.display = "none"; // Hide the grid while playing the video   
+                    videoContainer.firstChild.before(fullscreenVideo); // Insert the video before the grid 
+                    videoContainer.appendChild(closeButton);
+                    container.firstChild.before(videoName);
+                    currentFullScreenVideo = fullscreenVideo;
+                    videoName.scrollIntoView({ behavior: 'smooth' });
+                });
+
+                gridContainer.appendChild(card);
+            });
+        </script>
+    </div>
+</body>
+
+</html>
