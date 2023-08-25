@@ -121,6 +121,7 @@
                 card.className = "card";
 
                 const videoElem = document.createElement("video");
+                videoElem.setAttribute("preload","none");
                 videoElem.className = "preview";
                 videoElem.src = video;
                 videoElem.muted = true;
@@ -176,6 +177,7 @@
 
 
                     const fullscreenVideo = document.createElement("video");
+                    fullscreenVideo.setAttribute("preload","none");
                     const closeButton = document.createElement("button");
                     const videoName = document.createElement("div");
                     videoName.id = "video-name";
