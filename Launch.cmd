@@ -1,11 +1,15 @@
 @echo off
 (
     echo videos=[
-
-    for %%i in (*.webm *.mp4 *.mkv) do (
-        echo "%%i",
+    
+    for /r %%i in (*.webm *.mp4 *.mkv) do (
+        set "videoPath=%%~fi"
+        setlocal enabledelayedexpansion
+        set "videoPath=!videoPath:\=\\!"
+        echo "!videoPath!",
+        endlocal
     )
-
+    
     echo ];
 ) > video_list.js
 
